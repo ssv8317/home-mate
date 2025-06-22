@@ -23,54 +23,64 @@ namespace HomeMate.Services
             var filterBuilder = Builders<HousingListing>.Filter;
             var filter = filterBuilder.Empty;
 
-            // Apply filters
-            if (!string.IsNullOrEmpty(filters.ZipCode))
+            // ZipCode filter - only apply if not empty
+            if (!string.IsNullOrWhiteSpace(filters.ZipCode))
             {
-                filter &= filterBuilder.Eq(h => h.ZipCode, filters.ZipCode);
+                Console.WriteLine($"🔍 Searching for zipCode: '{filters.ZipCode}'");
+                filter &= filterBuilder.Eq(h => h.ZipCode, filters.ZipCode.Trim());
             }
 
-            if (filters.MinPrice.HasValue)
+            // Price filters - only apply if values are greater than 0
+            if (filters.MinPrice.HasValue && filters.MinPrice > 0)
             {
                 filter &= filterBuilder.Gte(h => h.Price, filters.MinPrice.Value);
             }
 
-            if (filters.MaxPrice.HasValue)
+            if (filters.MaxPrice.HasValue && filters.MaxPrice > 0)
             {
                 filter &= filterBuilder.Lte(h => h.Price, filters.MaxPrice.Value);
             }
 
+            // Bedroom filter
             if (filters.Bedrooms?.Any() == true)
             {
                 filter &= filterBuilder.In(h => h.Bedrooms, filters.Bedrooms);
             }
 
-            if (filters.Bathrooms.HasValue)
+            // Bathroom filter - only apply if greater than 0
+            if (filters.Bathrooms.HasValue && filters.Bathrooms > 0)
             {
                 filter &= filterBuilder.Gte(h => h.Bathrooms, filters.Bathrooms.Value);
             }
 
-            if (filters.PetFriendly.HasValue)
+            // Boolean filters - ONLY apply if explicitly TRUE
+            if (filters.PetFriendly == true)
             {
-                filter &= filterBuilder.Eq(h => h.PetFriendly, filters.PetFriendly.Value);
+                filter &= filterBuilder.Eq(h => h.PetFriendly, true);
             }
 
-            if (filters.Furnished.HasValue)
+            if (filters.Furnished == true)
             {
-                filter &= filterBuilder.Eq(h => h.Furnished, filters.Furnished.Value);
+                filter &= filterBuilder.Eq(h => h.Furnished, true);
             }
 
+            // Amenities filter - use AnyIn instead of All
             if (filters.Amenities?.Any() == true)
             {
-                filter &= filterBuilder.All(h => h.Amenities, filters.Amenities);
+                filter &= filterBuilder.AnyIn(h => h.Amenities, filters.Amenities);
             }
 
             // Apply sorting
             var sort = GetSortDefinition(filters.SortBy, filters.SortOrder);
 
-            return await _housingListings.Find(filter)
+            var results = await _housingListings.Find(filter)
                 .Sort(sort)
-                .Limit(50) // Limit results for performance
+                .Limit(50)
                 .ToListAsync();
+
+            Console.WriteLine($"✅ Search returned {results.Count} results for zipCode '{filters.ZipCode}'");
+            
+            return results;
         }
 
         public async Task<IEnumerable<HousingListing>> GetFeaturedListingsAsync()

@@ -158,3 +158,4 @@ C:\Users\sathv\Downloads\version-full\project\backend-home\HomeMate\obj\Debug\ne
 C:\Users\sathv\Downloads\version-full\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.csproj.Up2Date
 C:\Users\sathv\Downloads\version-full\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.genruntimeconfig.cache
 C:\Users\sathv\Downloads\version-full\project\backend-home\HomeMate\obj\Debug\net8.0\ref\HomeMate.dll
+C:\Users\sathv\Downloads\version-full\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.sourcelink.json
