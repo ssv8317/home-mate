@@ -212,6 +212,60 @@
           </div>
         </div>
       </div>
+
+      <!-- Roommate Match Swipe UI -->
+      <div *ngIf="activeTab === 'home'" class="mb-12">
+        <div *ngIf="potentialMatches.length > 0; else noMatches" class="flex flex-col items-center">
+          <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg mb-4">
+            <ng-container *ngIf="potentialMatches[currentMatchIndex] as match">
+              <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                  {{ match.profile.fullName ? match.profile.fullName[0] : '?' }}
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-gray-900">{{ match.profile.fullName }}</h3>
+                  <p class="text-gray-600">{{ match.profile.age }} • {{ match.profile.occupation }}</p>
+                  <div class="mt-1">
+                    <span [ngClass]="matchService.getCompatibilityColor(match.compatibilityScore)" class="font-semibold">
+                      {{ match.compatibilityScore }}% - {{ matchService.getCompatibilityText(match.compatibilityScore) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-2">
+                <span class="text-gray-700 font-medium">Budget:</span>
+                <span class="ml-1">{{ match.profile.budgetRange }}</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-gray-700 font-medium">Location:</span>
+                <span class="ml-1">{{ match.profile.locationPreference }}</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-gray-700 font-medium">About:</span>
+                <span class="ml-1">{{ match.profile.aboutMe }}</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-gray-700 font-medium">Interests:</span>
+                <span class="ml-1">
+                  <span *ngFor="let interest of match.profile.sharedInterests; let i = index">
+                    {{ interest }}<span *ngIf="i < match.profile.sharedInterests.length - 1">, </span>
+                  </span>
+                </span>
+              </div>
+              <div class="flex justify-center mt-6 space-x-8">
+                <button (click)="swipeLeft()" class="bg-red-500 text-white px-6 py-3 rounded-full text-xl hover:bg-red-600 transition-all">👎</button>
+                <button (click)="swipeRight()" class="bg-green-500 text-white px-6 py-3 rounded-full text-xl hover:bg-green-600 transition-all">👍</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        <ng-template #noMatches>
+          <div class="text-gray-500 text-center py-8">
+            <div class="text-4xl mb-2">🎉</div>
+            <p class="text-lg font-medium">No more potential matches at the moment.</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
     <!-- Apartment Search Tab -->

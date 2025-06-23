@@ -1,5 +1,5 @@
 export interface RoommateProfile {
-  id: string;
+  id: string; // maps to _id in MongoDB
   userId: string;
   displayName: string;
   age: number;
@@ -7,22 +7,27 @@ export interface RoommateProfile {
   occupation: string;
   bio: string;
   profilePictures: string[];
-  
-  // Budget & Location
   budgetMin: number;
   budgetMax: number;
   preferredLocations: string[];
-  
-  // Lifestyle (1-5 scale)
   cleanliness: number;
   socialLevel: number;
   noiseLevel: number;
   smokingOk: boolean;
   petsOk: boolean;
-  
   interests: string[];
   isActive: boolean;
-  createdAt: Date;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+// Extended profile for frontend-mapped fields
+export interface RoommateProfileView extends RoommateProfile {
+  fullName: string;
+  budgetRange: string;
+  locationPreference: string;
+  aboutMe: string;
+  sharedInterests: string[];
 }
 
 export interface Match {
@@ -35,27 +40,15 @@ export interface Match {
   status: MatchStatus;
   user1Action: UserAction;
   user2Action: UserAction;
-  matchedAt?: Date;
-  createdAt: Date;
-}
-
-export interface MatchResponse {
-  id: string;
-  profile: RoommateProfile;
-  compatibilityScore: number;
-  isNewMatch: boolean;
-}
-
-export interface SwipeRequest {
-  profileId: string;
-  action: UserAction;
+  matchedAt?: string; // ISO date string or null
+  createdAt: string;  // ISO date string
 }
 
 export enum MatchStatus {
-  Pending = 0,
-  Matched = 1,
-  Rejected = 2,
-  Expired = 3
+  Pending = 'Pending',
+  Matched = 'Matched',
+  Rejected = 'Rejected',
+  Expired = 'Expired'
 }
 
 export enum UserAction {
@@ -63,4 +56,17 @@ export enum UserAction {
   Like = 1,
   Pass = 2,
   SuperLike = 3
+}
+
+// Use RoommateProfileView for mapped profiles in responses
+export interface MatchResponse {
+  id: string;
+  profile: RoommateProfileView;
+  compatibilityScore: number;
+  isNewMatch: boolean;
+}
+
+export interface SwipeRequest {
+  profileId: string;
+  action: UserAction;
 }

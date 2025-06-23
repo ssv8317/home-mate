@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { MatchService, MatchResponse, Match, RoommateProfile, SwipeRequest, UserAction } from '../../services/match.service';
+import { MatchService, MatchResponse, RoommateProfile, SwipeRequest, UserAction } from '../../services/match.service';
 import { HousingService } from '../../services/housing.service';
 import { MessageService, ChatMessage, Conversation } from '../../services/message.service';
 import { User } from '../../models/user.model';
@@ -40,7 +40,7 @@ export class DashboardComponent implements OnInit {
 
   // Matches and messaging
   potentialMatches: MatchResponse[] = [];
-  userMatches: Match[] = [];
+  userMatches: MatchResponse[] = [];
   currentMatchIndex = 0;
   isLoadingMatches = false;
   showMatchModal = false;
@@ -49,11 +49,16 @@ export class DashboardComponent implements OnInit {
   conversations: Conversation[] = [];
   messages: ChatMessage[] = [];
   newMessage: string = '';
-  isTyping: boolean = false;
+  selectedProfile: any;
+  chatMessages: { [profileId: string]: any[] } = {};
+
+  // Add this property to your component class
+  matchedProfiles: any[] = [];
+  public isTyping: boolean = false;
 
   constructor(
     private authService: AuthService,
-    private matchService: MatchService,
+    public matchService: MatchService, // <-- Make public for template access
     private housingService: HousingService,
     private messageService: MessageService,
     private formBuilder: FormBuilder
@@ -190,11 +195,12 @@ export class DashboardComponent implements OnInit {
   // --- MATCHING SYSTEM METHODS ---
 
   loadPotentialMatches(): void {
-    if (this.currentUser) {
+    if (this.currentUser?.id) {
       this.isLoadingMatches = true;
       this.matchService.getPotentialMatches(this.currentUser.id).subscribe({
         next: (matches) => {
           this.potentialMatches = matches;
+          this.currentMatchIndex = 0; // Reset index when loading new matches
           this.isLoadingMatches = false;
         },
         error: (error) => {
@@ -205,8 +211,17 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // Add swipeLeft and swipeRight for template compatibility
+  swipeLeft(): void {
+    this.onSwipe('dislike' as unknown as UserAction);
+  }
+
+  swipeRight(): void {
+    this.onSwipe('like' as unknown as UserAction);
+  }
+
   onSwipe(action: UserAction): void {
-    if (this.currentUser && this.potentialMatches.length > 0) {
+    if (this.currentUser && this.currentUser.id && this.potentialMatches.length > 0) {
       const currentMatch = this.potentialMatches[this.currentMatchIndex];
       const request: SwipeRequest = {
         profileId: currentMatch.profile.id,
@@ -231,8 +246,8 @@ export class DashboardComponent implements OnInit {
   nextMatch(): void {
     this.currentMatchIndex++;
     if (this.currentMatchIndex >= this.potentialMatches.length) {
-      this.loadPotentialMatches();
       this.currentMatchIndex = 0;
+      // Optionally reload matches or show a message
     }
   }
 
@@ -245,7 +260,7 @@ export class DashboardComponent implements OnInit {
   loadUserMatches(): void {
     if (this.currentUser?.id) {
       this.matchService.getMatches(this.currentUser.id).subscribe({
-        next: (matches: Match[]) => this.userMatches = matches,
+        next: (matches: MatchResponse[]) => this.userMatches = matches,
         error: (error: any) => console.error('Error loading matches:', error)
       });
     }
@@ -255,4 +270,35 @@ export class DashboardComponent implements OnInit {
 
   // Messaging and other methods remain unchanged...
   // (You can keep your getChatMessages, sendMessage, getInitials, saveProfile, resetProfile, etc.)
+  getInitials(name: string | undefined | null): string {
+    if (!name) return '';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + (parts[1][0] || '')).toUpperCase();
+  }
+
+  // Add this method to your DashboardComponent class
+  selectProfile(profile: any): void {
+    this.selectedProfile = profile;
+  }
+
+  getChatMessages(profileId: string): Array<{ content: string, isOwn: boolean, timestamp: Date }> {
+    return this.chatMessages[profileId] || [];
+  }
+
+  sendMessage() {
+    if (!this.newMessage.trim() || !this.selectedProfile) {
+      return;
+    }
+    const profileId = this.selectedProfile.id;
+    if (!this.chatMessages[profileId]) {
+      this.chatMessages[profileId] = [];
+    }
+    this.chatMessages[profileId].push({
+      content: this.newMessage,
+      timestamp: new Date(),
+      isOwn: true
+    });
+    this.newMessage = '';
+  }
 }
