@@ -1,35 +1,48 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-// Simple interface for now
-export interface RoommateMatch {
-  user: any;
-  matchPercentage: number;
-  sharedPreferences: string[];
-}
+import { RoommateProfile, Match, MatchResponse, SwipeRequest } from '../models/match.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatchService {
-  private apiUrl = 'https://localhost:56636/api'; // ← Fix this URL
+  private apiUrl = 'https://localhost:56636/api/match';
 
   constructor(private http: HttpClient) {}
 
-  findMatches(zipCode: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/matches/${zipCode}`);
+  getPotentialMatches(userId: string): Observable<MatchResponse[]> {
+    return this.http.get<MatchResponse[]>(`${this.apiUrl}/potential/${userId}`);
   }
 
-  getMatchDetails(matchId: string): Observable<RoommateMatch> {
-    return this.http.get<RoommateMatch>(`${this.apiUrl}/matches/${matchId}`);
+  swipe(userId: string, request: SwipeRequest): Observable<MatchResponse> {
+    return this.http.post<MatchResponse>(`${this.apiUrl}/swipe/${userId}`, request);
   }
 
-  likeProfile(profileId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/like`, { profileId });
+  getMatches(userId: string): Observable<Match[]> {
+    return this.http.get<Match[]>(`${this.apiUrl}/matches/${userId}`);
   }
 
-  passProfile(profileId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/pass`, { profileId });
+  getRoommateProfile(userId: string): Observable<RoommateProfile> {
+    return this.http.get<RoommateProfile>(`${this.apiUrl}/profile/${userId}`);
+  }
+
+  createOrUpdateProfile(userId: string, profile: RoommateProfile): Observable<RoommateProfile> {
+    return this.http.post<RoommateProfile>(`${this.apiUrl}/profile/${userId}`, profile);
+  }
+
+  // Helper methods
+  getCompatibilityText(score: number): string {
+    if (score >= 80) return 'Excellent Match';
+    if (score >= 60) return 'Good Match';
+    if (score >= 40) return 'Fair Match';
+    return 'Low Match';
+  }
+
+  getCompatibilityColor(score: number): string {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-blue-600';
+    if (score >= 40) return 'text-yellow-600';
+    return 'text-red-600';
   }
 }

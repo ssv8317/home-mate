@@ -29,6 +29,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IHousingService, HousingService>();
+builder.Services.AddScoped<IMatchService, MatchService>(); // Register MatchService
 
 var app = builder.Build();
 
