@@ -22,7 +22,7 @@ namespace HomeMate.Data
         }
 
         // Existing collection
-        public IMongoCollection<User> Users => Database.GetCollection<User>("users");
+        public IMongoCollection<User> Users => Database.GetCollection<User>("Users");
         
         // NEW: Housing collection
         public IMongoCollection<HousingListing> HousingListings => Database.GetCollection<HousingListing>("housingListings");

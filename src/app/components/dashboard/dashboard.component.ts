@@ -72,6 +72,9 @@ export class DashboardComponent implements OnInit {
   hasSearched = false;
   errorMessage = '';
 
+  // Add a property to track swiped profiles
+  swipedProfileIds: Set<string> = new Set();
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -190,23 +193,23 @@ export class DashboardComponent implements OnInit {
 
   private loadMatchedProfiles(): void {
     if (!this.currentUser) return;
-    // Pass currentUser.interests if available, otherwise empty array
     const userInterests = (this.currentUser as any).interests || [];
     this.matchService.getPotentialMatches(this.currentUser.id!, userInterests).subscribe({
       next: (matches: MatchResponse[]) => {
-        console.log('Potential matches from backend:', matches); // <-- Debug log
-        this.matchedProfiles = matches.map(m => ({
-          id: m.profile.id,
-          fullName: m.profile.fullName,
-          age: m.profile.age,
-          occupation: m.profile.occupation,
-          budgetRange: m.profile.budgetRange,
-          locationPreference: m.profile.locationPreference,
-          matchPercentage: m.compatibilityScore,
-          sharedInterests: m.profile.sharedInterests,
-          profileImage: m.profile.profilePictures?.[0] || '',
-          lastActive: new Date(m.profile.updatedAt)
-        }));
+        this.matchedProfiles = matches
+          .filter(m => !this.swipedProfileIds.has(m.profile.id)) // Exclude swiped profiles
+          .map(m => ({
+            id: m.profile.id,
+            fullName: m.profile.fullName,
+            age: m.profile.age,
+            occupation: m.profile.occupation,
+            budgetRange: m.profile.budgetRange,
+            locationPreference: m.profile.locationPreference,
+            matchPercentage: m.compatibilityScore,
+            sharedInterests: m.profile.sharedInterests,
+            profileImage: m.profile.profilePictures?.[0] || '',
+            lastActive: new Date(m.profile.updatedAt)
+          }));
         if (this.matchedProfiles.length === 0) {
           console.warn('No matched profiles found for this user.');
         }

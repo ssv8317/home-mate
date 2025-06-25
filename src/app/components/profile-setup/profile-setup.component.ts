@@ -25,14 +25,14 @@ export class ProfileSetupComponent {
   ) {
     this.profileForm = this.fb.group({
       fullName: ['', Validators.required],
-      age: ['', Validators.required],
+      age: ['', [Validators.required, Validators.min(18)]],
       gender: ['', Validators.required],
       occupation: [''],
       bio: [''],
-      budgetMin: ['', Validators.required],
-      budgetMax: ['', Validators.required],
-      preferredLocations: [''], // Change to string for easier input
-      interests: [''],          // Change to string for easier input
+      budgetMin: ['', [Validators.required, Validators.min(0)]],
+      budgetMax: ['', [Validators.required, Validators.min(0)]],
+      preferredLocations: [''],
+      interests: [''],
       petFriendly: [false],
       smokingOk: [false],
       petsOk: [false],
@@ -43,7 +43,6 @@ export class ProfileSetupComponent {
       isActive: [true]
     });
 
-    // Get current user ID (assumes AuthService provides it)
     this.authService.getCurrentUser().subscribe(user => {
       this.currentUserId = user?.id || null;
     });
@@ -64,7 +63,7 @@ export class ProfileSetupComponent {
     // Map fullName to displayName for backend
     const profile: RoommateProfile = {
       ...formValue,
-      displayName: formValue.fullName, // map fullName to displayName
+      displayName: formValue.fullName,
       userId: this.currentUserId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -75,7 +74,7 @@ export class ProfileSetupComponent {
 
     this.matchService.createOrUpdateProfile(this.currentUserId, profileToSend).subscribe({
       next: () => this.router.navigate(['/dashboard']),
-      error: (err) => alert('Failed to save profile. Please try again.')
+      error: () => alert('Failed to save profile. Please try again.')
     });
   }
 }
