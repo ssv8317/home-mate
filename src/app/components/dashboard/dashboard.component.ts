@@ -192,9 +192,9 @@ export class DashboardComponent implements OnInit {
     if (!this.currentUser) return;
     // Pass currentUser.interests if available, otherwise empty array
     const userInterests = (this.currentUser as any).interests || [];
-    this.matchService.getMatches(this.currentUser.id!, userInterests).subscribe({
+    this.matchService.getPotentialMatches(this.currentUser.id!, userInterests).subscribe({
       next: (matches: MatchResponse[]) => {
-        console.log('Matches from backend:', matches); // <-- Debug log
+        console.log('Potential matches from backend:', matches); // <-- Debug log
         this.matchedProfiles = matches.map(m => ({
           id: m.profile.id,
           fullName: m.profile.fullName,
