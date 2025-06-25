@@ -37,6 +37,9 @@ export interface ChatMessage {
 // Define tab type separately for better type safety
 export type TabType = 'home' | 'apartments' | 'saved' | 'matches' | 'messages' | 'profile';
 
+// Define UserAction type for swipe actions
+type UserAction = 'like' | 'pass';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -412,5 +415,42 @@ export class DashboardComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // Swipe actions
+  swipeRight(profile: MatchedProfile): void {
+    // Mark as swiped
+    this.swipedProfileIds.add(profile.id);
+    // Optionally, call backend to record swipe
+    this.matchService.swipe(this.currentUser!.id!, {
+      profileId: profile.id,
+      action: 'like'
+    }).subscribe({
+      next: () => {
+        // After swipe, reload potential matches
+        this.loadMatchedProfiles();
+      },
+      error: (err) => {
+        console.error('Swipe error:', err);
+      }
+    });
+  }
+
+  swipeLeft(profile: MatchedProfile): void {
+    // Mark as swiped
+    this.swipedProfileIds.add(profile.id);
+    // Optionally, call backend to record swipe
+    this.matchService.swipe(this.currentUser!.id!, {
+      profileId: profile.id,
+      action: 'pass'
+    }).subscribe({
+      next: () => {
+        // After swipe, reload potential matches
+        this.loadMatchedProfiles();
+      },
+      error: (err) => {
+        console.error('Swipe error:', err);
+      }
+    });
   }
 }
