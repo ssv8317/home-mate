@@ -1,0 +1,83 @@
+<h2 class="text-2xl font-bold mb-4">Set Up Your Roommate Profile</h2>
+<form [formGroup]="profileForm" (ngSubmit)="submit()">
+  <div>
+    <label>Full Name</label>
+    <input formControlName="fullName" type="text" required />
+  </div>
+  <div>
+    <label>Age</label>
+    <input formControlName="age" type="number" required />
+  </div>
+  <div>
+    <label>Gender</label>
+    <select formControlName="gender" required>
+      <option value="">Select</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div>
+    <label>Occupation</label>
+    <input formControlName="occupation" type="text" />
+  </div>
+  <div>
+    <label>Bio</label>
+    <textarea formControlName="bio"></textarea>
+  </div>
+  <div>
+    <label>Budget Min</label>
+    <input formControlName="budgetMin" type="number" required />
+  </div>
+  <div>
+    <label>Budget Max</label>
+    <input formControlName="budgetMax" type="number" required />
+  </div>
+  <div>
+    <label>Preferred Locations (comma separated)</label>
+    <input formControlName="preferredLocations" type="text" placeholder="e.g. Downtown, Midtown" />
+  </div>
+  <div>
+    <label>Interests (comma separated)</label>
+    <input formControlName="interests" type="text" placeholder="e.g. Cooking, Movies" />
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" formControlName="petFriendly" />
+      Pet Friendly
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" formControlName="smokingOk" />
+      Smoking OK
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" formControlName="petsOk" />
+      Pets OK
+    </label>
+  </div>
+  <div>
+    <label>Cleanliness (1-5)</label>
+    <input formControlName="cleanliness" type="number" min="1" max="5" />
+  </div>
+  <div>
+    <label>Social Level (1-5)</label>
+    <input formControlName="socialLevel" type="number" min="1" max="5" />
+  </div>
+  <div>
+    <label>Noise Level (1-5)</label>
+    <input formControlName="noiseLevel" type="number" min="1" max="5" />
+  </div>
+
+  <!-- Debug: Show invalid controls -->
+  <div *ngIf="profileForm.invalid" style="color:red; margin-bottom: 1rem;">
+    <div *ngFor="let c of profileForm.controls | keyvalue">
+      <div *ngIf="c.value.invalid">{{c.key}} is invalid</div>
+    </div>
+  </div>
+
+  <button type="submit" [disabled]="profileForm.invalid">Save Profile</button>
+</form>

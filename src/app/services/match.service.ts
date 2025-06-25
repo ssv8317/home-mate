@@ -12,7 +12,13 @@ export class MatchService {
 
   constructor(private http: HttpClient) {}
 
-  getPotentialMatches(userId: string): Observable<MatchResponse[]> {
+  // Helper to get shared interests between current user and match
+  private getSharedInterests(userInterests: string[], matchInterests: string[]): string[] {
+    if (!userInterests || !matchInterests) return [];
+    return matchInterests.filter(i => userInterests.includes(i));
+  }
+
+  getPotentialMatches(userId: string, userInterests: string[] = []): Observable<MatchResponse[]> {
     return this.http.get<MatchResponse[]>(`${this.apiUrl}/potential/${userId}`).pipe(
       map(matches => matches.map(match => ({
         ...match,
@@ -23,18 +29,13 @@ export class MatchService {
             ? `$${match.profile.budgetMin} - $${match.profile.budgetMax}` : '',
           locationPreference: match.profile.preferredLocations ? match.profile.preferredLocations.join(', ') : '',
           aboutMe: match.profile.bio || '',
-          sharedInterests: match.profile.interests || [],
-        } as RoommateProfileView,
-        matchPercentage: match.compatibilityScore // For template compatibility
+          sharedInterests: this.getSharedInterests(userInterests, match.profile.interests || []),
+        } as RoommateProfileView
       })))
     );
   }
 
-  swipe(userId: string, request: SwipeRequest): Observable<MatchResponse> {
-    return this.http.post<MatchResponse>(`${this.apiUrl}/swipe/${userId}`, request);
-  }
-
-  getMatches(userId: string): Observable<MatchResponse[]> {
+  getMatches(userId: string, userInterests: string[] = []): Observable<MatchResponse[]> {
     return this.http.get<MatchResponse[]>(`${this.apiUrl}/matches/${userId}`).pipe(
       map(matches => matches.map(match => ({
         ...match,
@@ -45,11 +46,14 @@ export class MatchService {
             ? `$${match.profile.budgetMin} - $${match.profile.budgetMax}` : '',
           locationPreference: match.profile.preferredLocations ? match.profile.preferredLocations.join(', ') : '',
           aboutMe: match.profile.bio || '',
-          sharedInterests: match.profile.interests || [],
-        } as RoommateProfileView,
-        matchPercentage: match.compatibilityScore
+          sharedInterests: this.getSharedInterests(userInterests, match.profile.interests || []),
+        } as RoommateProfileView
       })))
     );
+  }
+
+  swipe(userId: string, request: SwipeRequest): Observable<MatchResponse> {
+    return this.http.post<MatchResponse>(`${this.apiUrl}/swipe/${userId}`, request);
   }
 
   getRoommateProfile(userId: string): Observable<RoommateProfile> {

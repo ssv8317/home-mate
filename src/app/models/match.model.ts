@@ -2,6 +2,7 @@ export interface RoommateProfile {
   id: string; // maps to _id in MongoDB
   userId: string;
   displayName: string;
+  fullName?: string; // Optional, for display purposes
   age: number;
   gender: string;
   occupation: string;
@@ -15,6 +16,7 @@ export interface RoommateProfile {
   noiseLevel: number;
   smokingOk: boolean;
   petsOk: boolean;
+  petFriendly?: boolean; // Optional, for compatibility with some forms
   interests: string[];
   isActive: boolean;
   createdAt: string; // ISO date string

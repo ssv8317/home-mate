@@ -212,60 +212,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Roommate Match Swipe UI -->
-      <div *ngIf="activeTab === 'home'" class="mb-12">
-        <div *ngIf="potentialMatches.length > 0; else noMatches" class="flex flex-col items-center">
-          <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg mb-4">
-            <ng-container *ngIf="potentialMatches[currentMatchIndex] as match">
-              <div class="flex items-center space-x-4 mb-4">
-                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">
-                  {{ match.profile.fullName ? match.profile.fullName[0] : '?' }}
-                </div>
-                <div>
-                  <h3 class="text-xl font-bold text-gray-900">{{ match.profile.fullName }}</h3>
-                  <p class="text-gray-600">{{ match.profile.age }} • {{ match.profile.occupation }}</p>
-                  <div class="mt-1">
-                    <span [ngClass]="matchService.getCompatibilityColor(match.compatibilityScore)" class="font-semibold">
-                      {{ match.compatibilityScore }}% - {{ matchService.getCompatibilityText(match.compatibilityScore) }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="mb-2">
-                <span class="text-gray-700 font-medium">Budget:</span>
-                <span class="ml-1">{{ match.profile.budgetRange }}</span>
-              </div>
-              <div class="mb-2">
-                <span class="text-gray-700 font-medium">Location:</span>
-                <span class="ml-1">{{ match.profile.locationPreference }}</span>
-              </div>
-              <div class="mb-2">
-                <span class="text-gray-700 font-medium">About:</span>
-                <span class="ml-1">{{ match.profile.aboutMe }}</span>
-              </div>
-              <div class="mb-2">
-                <span class="text-gray-700 font-medium">Interests:</span>
-                <span class="ml-1">
-                  <span *ngFor="let interest of match.profile.sharedInterests; let i = index">
-                    {{ interest }}<span *ngIf="i < match.profile.sharedInterests.length - 1">, </span>
-                  </span>
-                </span>
-              </div>
-              <div class="flex justify-center mt-6 space-x-8">
-                <button (click)="swipeLeft()" class="bg-red-500 text-white px-6 py-3 rounded-full text-xl hover:bg-red-600 transition-all">👎</button>
-                <button (click)="swipeRight()" class="bg-green-500 text-white px-6 py-3 rounded-full text-xl hover:bg-green-600 transition-all">👍</button>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-        <ng-template #noMatches>
-          <div class="text-gray-500 text-center py-8">
-            <div class="text-4xl mb-2">🎉</div>
-            <p class="text-lg font-medium">No more potential matches at the moment.</p>
-          </div>
-        </ng-template>
-      </div>
     </div>
 
     <!-- Apartment Search Tab -->
@@ -388,7 +334,7 @@
             <div class="flex items-center space-x-4">
               <label class="text-sm font-medium text-gray-700">Sort by:</label>
               <select 
-                (change)="sortHousingResults($event)"
+                (change)="onSortChange($event)"
                 class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="date-desc">Newest First</option>
@@ -688,7 +634,7 @@
                   <!-- Show last message preview if exists -->
                   <div *ngIf="getChatMessages(profile.id).length > 0" class="mt-2 pt-2 border-t border-gray-100">
                     <p class="text-xs text-gray-500 truncate">
-                      {{ getChatMessages(profile.id)[getChatMessages(profile.id).length - 1].content }}
+                      {{ getChatMessages(profile.id)[getChatMessages(profile.id).length - 1].text }}
                     </p>
                   </div>
                 </div>
@@ -780,7 +726,7 @@
                       [class.text-gray-900]="!message.isOwn"
                       class="px-4 py-2 rounded-lg shadow-sm"
                     >
-                      <p class="text-sm">{{ message.content }}</p>
+                      <p class="text-sm">{{ message.text }}</p>
                       <p class="text-xs mt-1 opacity-70">
                         {{ message.timestamp | date:'short' }}
                       </p>
@@ -859,7 +805,7 @@
           <div class="lg:col-span-1 border-r border-gray-200 overflow-y-auto">
             <div class="p-4">
               <div class="space-y-2">
-                <!-- Active conversations -->
+                <!-- Active conversations from matched profiles -->
                 <div 
                   *ngFor="let profile of matchedProfiles.slice(0, 3)" 
                   (click)="selectProfile(profile); activeTab = 'matches'"
@@ -882,8 +828,41 @@
                   </div>
                   
                   <p class="text-sm text-gray-600 truncate">
-                    {{ getChatMessages(profile.id).length > 0 ? getChatMessages(profile.id)[getChatMessages(profile.id).length - 1].content : 'Start a conversation...' }}
+                    {{ getChatMessages(profile.id).length > 0 ? getChatMessages(profile.id)[getChatMessages(profile.id).length - 1].text : 'Start a conversation...' }}
                   </p>
+                </div>
+                
+                <!-- Sample landlord conversations -->
+                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                        JS
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-gray-900">John Smith (Landlord)</h4>
+                        <p class="text-xs text-gray-500">Downtown Apartment</p>
+                      </div>
+                    </div>
+                    <span class="text-xs text-gray-500">1 hour ago</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">The apartment is available for viewing this weekend...</p>
+                </div>
+                
+                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                        SJ
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-gray-900">Sarah Johnson (Landlord)</h4>
+                        <p class="text-xs text-gray-500">Campus Studio</p>
+                      </div>
+                    </div>
+                    <span class="text-xs text-gray-500">Yesterday</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">Thanks for your interest! The lease terms are flexible...</p>
                 </div>
               </div>
             </div>
@@ -907,7 +886,7 @@
               </div>
             </div>
             
-            <!-- Message Input -->
+            <!-- Message Input (disabled when no conversation selected) -->
             <div class="border-t border-gray-200 p-4 bg-white">
               <div class="flex items-center space-x-4">
                 <input 
@@ -932,189 +911,131 @@
     <!-- Profile Tab -->
     <div *ngIf="activeTab === 'profile'">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Profile Form -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-8">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-              👤
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900">My Profile</h2>
-          </div>
-          
-          <!-- Profile Form -->
-          <form class="space-y-6">
-            <!-- Personal Information Row -->
+        <!-- Profile Info -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">👤 My Profile</h2>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <input 
                   type="text" 
-                  [value]="currentUser?.fullName || 'John Doe'" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your full name"
+                  [value]="currentUser?.fullName || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input 
                   type="email" 
-                  [value]="currentUser?.email || 'svik452@gmail.com'" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your email"
+                  [value]="currentUser?.email || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
-            </div>
-
-            <!-- Age and Occupation Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Age</label>
                 <input 
                   type="number" 
-                  value="25" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your age"
+                  [value]="currentUser?.age || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
                 <input 
                   type="text" 
-                  value="Software Developer" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your occupation"
+                  [value]="currentUser?.occupation || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
-            </div>
-
-            <!-- Budget Range and Location Preference Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Budget Range</label>
                 <input 
                   type="text" 
-                  value="$1000-1500/month" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., $1000-1500/month"
+                  [value]="currentUser?.budgetRange || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Location Preference</label>
                 <input 
                   type="text" 
-                  value="Downtown" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Preferred location"
+                  [value]="currentUser?.locationPreference || ''"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
               </div>
             </div>
-
-            <!-- About Me Section -->
-            <div>
+            
+            <div class="mt-6">
               <label class="block text-sm font-medium text-gray-700 mb-2">About Me</label>
               <textarea 
-                rows="4" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Tell us about yourself..."
-              >I am a software developer who loves coding and enjoys a clean, quiet living environment. Looking for a like-minded roommate to share a great apartment with!</textarea>
+                rows="4"
+                [value]="currentUser?.aboutMe || ''"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              ></textarea>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="flex space-x-4 pt-6">
-              <button 
-                type="submit" 
-                class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center"
-              >
+            
+            <div class="mt-8 flex space-x-4">
+              <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
                 💾 Save Changes
               </button>
-              <button 
-                type="button" 
-                class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center"
-              >
+              <button class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
                 🔄 Reset
               </button>
             </div>
-          </form>
+          </div>
         </div>
-
-        <!-- Profile Stats & Settings Sidebar -->
+        
+        <!-- Profile Stats -->
         <div class="space-y-6">
-          <!-- Profile Stats -->
           <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-4">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                <span class="text-blue-600">📊</span>
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900">Profile Stats</h3>
-            </div>
-            
+            <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Profile Stats</h3>
             <div class="space-y-4">
-              <!-- Profile Completeness -->
-              <div>
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-sm text-gray-600">Profile Completeness</span>
-                  <span class="text-sm font-medium text-green-600">85%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
-                </div>
-              </div>
-
-              <!-- Profile Views -->
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Profile Views</span>
-                <span class="text-sm font-medium text-blue-600">127</span>
+                <span class="text-gray-600">Profile Completeness</span>
+                <span class="font-semibold text-green-600">85%</span>
               </div>
-
-              <!-- Profile Matches -->
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Profile Matches</span>
-                <span class="text-sm font-medium text-green-600">{{ matchedProfiles.length }}</span>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
               </div>
-
-              <!-- Apartments Saved -->
+              
+              <div class="flex justify-between items-center pt-4">
+                <span class="text-gray-600">Profile Views</span>
+                <span class="font-semibold text-blue-600">127</span>
+              </div>
+              
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Apartments Saved</span>
-                <span class="text-sm font-medium text-red-600">12</span>
+                <span class="text-gray-600">Profile Matches</span>
+                <span class="font-semibold text-green-600">{{ matchedProfiles.length }}</span>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Apartments Saved</span>
+                <span class="font-semibold text-red-600">12</span>
               </div>
             </div>
           </div>
-
-          <!-- Account Settings -->
+          
           <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-4">
-              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                <span class="text-gray-600">⚙️</span>
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900">Account Settings</h3>
-            </div>
-            
+            <h3 class="text-lg font-bold text-gray-900 mb-4">⚙️ Account Settings</h3>
             <div class="space-y-4">
-              <!-- Email Notifications -->
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">Email Notifications</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
+                <span class="text-gray-700">Email Notifications</span>
+                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
               </div>
-
-              <!-- SMS Alerts -->
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">SMS Alerts</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
+                <span class="text-gray-700">SMS Alerts</span>
+                <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
               </div>
-
-              <!-- Profile Visibility -->
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">Profile Visibility</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
+                <span class="text-gray-700">Profile Visibility</span>
+                <input type="checkbox" checked class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
               </div>
             </div>
           </div>
