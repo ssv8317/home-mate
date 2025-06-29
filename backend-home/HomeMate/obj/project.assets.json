@@ -1707,11 +1707,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sathv\\Downloads\\version-full\\project\\backend-home\\HomeMate\\HomeMate.csproj",
+      "projectUniqueName": "C:\\Users\\sathv\\Documents\\project-code\\project\\backend-home\\HomeMate\\HomeMate.csproj",
       "projectName": "HomeMate",
-      "projectPath": "C:\\Users\\sathv\\Downloads\\version-full\\project\\backend-home\\HomeMate\\HomeMate.csproj",
+      "projectPath": "C:\\Users\\sathv\\Documents\\project-code\\project\\backend-home\\HomeMate\\HomeMate.csproj",
       "packagesPath": "C:\\Users\\sathv\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sathv\\Downloads\\version-full\\project\\backend-home\\HomeMate\\obj\\",
+      "outputPath": "C:\\Users\\sathv\\Documents\\project-code\\project\\backend-home\\HomeMate\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
