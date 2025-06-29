@@ -258,27 +258,22 @@ namespace HomeMate.Services
             try
             {
                 double totalScore = 0;
-                int factors = 0;
 
-                // Budget compatibility (25% weight)
+                // Budget compatibility (25%)
                 var budgetScore = CalculateBudgetCompatibility(profile1, profile2);
                 totalScore += budgetScore * 0.25;
-                factors++;
 
-                // Lifestyle compatibility (35% weight)
-                var lifestyleScore = CalculateLifestyleCompatibility(profile1, profile2);
-                totalScore += lifestyleScore * 0.35;
-                factors++;
-
-                // Interest compatibility (20% weight)
-                var interestScore = CalculateInterestCompatibility(profile1, profile2);
-                totalScore += interestScore * 0.20;
-                factors++;
-
-                // Location compatibility (20% weight)
+                // Location compatibility (25%)
                 var locationScore = CalculateLocationCompatibility(profile1, profile2);
-                totalScore += locationScore * 0.20;
-                factors++;
+                totalScore += locationScore * 0.25;
+
+                // Lifestyle compatibility (25%)
+                var lifestyleScore = CalculateLifestyleCompatibility(profile1, profile2);
+                totalScore += lifestyleScore * 0.25;
+
+                // Interest compatibility (25%)
+                var interestScore = CalculateInterestCompatibility(profile1, profile2);
+                totalScore += interestScore * 0.25;
 
                 return Math.Round(totalScore, 2);
             }

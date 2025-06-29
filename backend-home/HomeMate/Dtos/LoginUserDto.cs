@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-
 namespace HomeMate.Dtos
 {
     public class LoginUserDto

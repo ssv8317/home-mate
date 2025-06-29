@@ -8,7 +8,7 @@ import { HousingService } from '../../services/housing.service';
 import { MatchService } from '../../services/match.service'; // <-- Add this import
 import { User } from '../../models/user.model';
 import { HousingListing } from '../../models/housing.model';
-import { MatchResponse, RoommateProfileView } from '../../models/match.model'; // <-- Add this import
+import { MatchResponse, RoommateProfileView, UserAction } from '../../models/match.model'; // <-- Add UserAction import
 // import { SearchFilters } from '../../models/housing.model'; // <-- Removed because it does not exist
 
 // Matched Profile Interface
@@ -38,7 +38,7 @@ export interface ChatMessage {
 export type TabType = 'home' | 'apartments' | 'saved' | 'matches' | 'messages' | 'profile';
 
 // Define UserAction type for swipe actions
-type UserAction = 'like' | 'pass';
+// (Removed local UserAction type to use the imported one from match.model)
 
 @Component({
   selector: 'app-dashboard',
@@ -109,35 +109,18 @@ export class DashboardComponent implements OnInit {
   }
 
   /**
-   * Checks if the user has a roommate profile.
-   * If not, redirects to profile setup.
-   * If yes, loads matched profiles.
+   * Checks if the user is logged in and loads matched profiles.
+   * No longer redirects to profile setup, since all info is collected at sign up.
    */
   private checkOrRedirectProfile(): void {
     this.authService.getCurrentUser().subscribe(user => {
       this.currentUser = user;
-      if (!user) {
+      if (!user || !user.id) {
         this.router.navigate(['/login']);
         return;
       }
-      if (!user.id) {
-        this.router.navigate(['/profile-setup']);
-        return;
-      }
-      // Only call if user.id is defined
-      this.matchService.getRoommateProfile(user.id as string).subscribe({
-        next: (profile) => {
-          if (!profile) {
-            this.router.navigate(['/profile-setup']);
-          } else {
-            this.loadMatchedProfiles();
-          }
-        },
-        error: (err) => {
-          // Always redirect to profile setup on error (e.g., 404)
-          this.router.navigate(['/profile-setup']);
-        }
-      });
+      // Directly load matched profiles
+      this.loadMatchedProfiles();
     });
   }
 
@@ -424,7 +407,7 @@ export class DashboardComponent implements OnInit {
     // Optionally, call backend to record swipe
     this.matchService.swipe(this.currentUser!.id!, {
       profileId: profile.id,
-      action: 'like'
+      action: 'like' as unknown as UserAction
     }).subscribe({
       next: () => {
         // After swipe, reload potential matches
@@ -442,7 +425,7 @@ export class DashboardComponent implements OnInit {
     // Optionally, call backend to record swipe
     this.matchService.swipe(this.currentUser!.id!, {
       profileId: profile.id,
-      action: 'pass'
+      action: 'pass' as unknown as UserAction
     }).subscribe({
       next: () => {
         // After swipe, reload potential matches

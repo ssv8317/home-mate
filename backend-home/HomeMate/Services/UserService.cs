@@ -23,6 +23,13 @@ namespace HomeMate.Services
 
 public async Task<User> RegisterUserAsync(RegisterUserDto dto)
 {
+    // Check if user with the same email already exists
+    var existingUser = await _context.Users.Find(u => u.Email == dto.Email).FirstOrDefaultAsync();
+    if (existingUser != null)
+    {
+        throw new Exception("A user with this email already exists.");
+    }
+
     var user = new User
     {
         FullName = dto.FullName,
@@ -33,9 +40,9 @@ public async Task<User> RegisterUserAsync(RegisterUserDto dto)
         Occupation = dto.Occupation,
         College = dto.College,
         SleepSchedule = dto.SleepSchedule,
-        CleanlinessLevel = dto.CleanlinessLevel, // Now string
+        CleanlinessLevel = dto.CleanlinessLevel,
         SmokingPreference = dto.SmokingPreference,
-        PetFriendly = dto.PetFriendly, // Now string
+        PetFriendly = dto.PetFriendly,
         BudgetRange = dto.BudgetRange,
         LocationPreference = dto.LocationPreference,
         AboutMe = dto.AboutMe,
@@ -99,5 +106,16 @@ public async Task<User> RegisterUserAsync(RegisterUserDto dto)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
+
+public async Task<bool> DeleteUserAsync(string userId, RoommateProfileService roommateProfileService)
+{
+    // Delete the user
+    var result = await _context.Users.DeleteOneAsync(u => u.Id == userId);
+
+    // Delete the roommate profile
+    await roommateProfileService.DeleteProfileByUserIdAsync(userId);
+
+    return result.DeletedCount > 0;
+}
     }
 }

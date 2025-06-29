@@ -70,6 +70,12 @@ namespace HomeMate.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<HousingListing>> GetListingById(string id)
         {
+            // Validate if id is a valid ObjectId
+            if (!MongoDB.Bson.ObjectId.TryParse(id, out _))
+            {
+                return BadRequest("Invalid id format. Must be a 24-character hex string.");
+            }
+
             var listing = await _housingService.GetListingByIdAsync(id);
             if (listing == null)
             {

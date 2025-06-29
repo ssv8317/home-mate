@@ -26,5 +26,8 @@ namespace HomeMate.Data
         
         // NEW: Housing collection
         public IMongoCollection<HousingListing> HousingListings => Database.GetCollection<HousingListing>("housingListings");
+
+        // NEW: Roommate Profile collection
+        public IMongoCollection<RoommateProfile> RoommateProfiles => Database.GetCollection<RoommateProfile>("roommate_profiles");
     }
 }

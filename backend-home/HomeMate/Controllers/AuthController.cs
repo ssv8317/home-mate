@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System; // Add this line
+using System.Linq;
 using HomeMate.Dtos;
 using HomeMate.Models;
 using HomeMate.Services;
+using System.Collections.Generic;
 
 namespace HomeMate.Controllers
 {
@@ -12,10 +14,12 @@ namespace HomeMate.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly RoommateProfileService _roommateProfileService; // Add this line
 
-        public AuthController(UserService userService)
+        public AuthController(UserService userService, RoommateProfileService roommateProfileService) // Modify constructor
         {
             _userService = userService;
+            _roommateProfileService = roommateProfileService; // Add this line
         }
 
         [HttpPost("register")]
@@ -29,6 +33,49 @@ namespace HomeMate.Controllers
             try
             {
                 var user = await _userService.RegisterUserAsync(registerUserDto);
+
+                // Parse budget range (e.g., "1000-1500") to min/max
+                var budgetParts = user.BudgetRange.Split('-');
+                decimal budgetMin = 0, budgetMax = 0;
+                if (budgetParts.Length == 2)
+                {
+                    decimal.TryParse(budgetParts[0], out budgetMin);
+                    decimal.TryParse(budgetParts[1], out budgetMax);
+                }
+
+                // Extract interests from AboutMe (split by space, comma, or semicolon)
+                var interests = new List<string>();
+                if (!string.IsNullOrWhiteSpace(user.AboutMe))
+                {
+                    interests = user.AboutMe
+                        .Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Distinct()
+                        .ToList();
+                }
+
+                var roommateProfile = new RoommateProfile
+                {
+                    UserId = user.Id,
+                    DisplayName = user.FullName,
+                    Age = user.Age,
+                    Gender = user.Gender,
+                    Occupation = user.Occupation,
+                    Bio = user.AboutMe,
+                    ProfilePictures = new List<string>(),
+                    BudgetMin = budgetMin,
+                    BudgetMax = budgetMax,
+                    PreferredLocations = new List<string> { user.LocationPreference },
+                    Cleanliness = int.TryParse(user.CleanlinessLevel, out var clean) ? clean : 3,
+                    SocialLevel = 3, // Default, or get from registration if available
+                    NoiseLevel = 3,  // Default, or get from registration if available
+                    SmokingOk = user.SmokingPreference.ToLower() == "yes",
+                    PetsOk = user.PetFriendly.ToLower() == "yes",
+                    Interests = interests,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _roommateProfileService.CreateProfileAsync(roommateProfile);
 
                 var response = new
                 {

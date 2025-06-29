@@ -20,67 +20,41 @@ namespace HomeMate.Services
 
         public async Task<IEnumerable<HousingListing>> SearchHousingAsync(HousingSearchFilters filters)
         {
-            var filterBuilder = Builders<HousingListing>.Filter;
-            var filter = filterBuilder.Empty;
+            var builder = Builders<HousingListing>.Filter;
+            var filter = builder.Empty;
 
-            // ZipCode filter - only apply if not empty
-            if (!string.IsNullOrWhiteSpace(filters.ZipCode))
-            {
-                Console.WriteLine($"🔍 Searching for zipCode: '{filters.ZipCode}'");
-                filter &= filterBuilder.Eq(h => h.ZipCode, filters.ZipCode.Trim());
-            }
+            if (!string.IsNullOrEmpty(filters.ZipCode))
+                filter &= builder.Eq(x => x.ZipCode, filters.ZipCode);
 
-            // Price filters - only apply if values are greater than 0
-            if (filters.MinPrice.HasValue && filters.MinPrice > 0)
-            {
-                filter &= filterBuilder.Gte(h => h.Price, filters.MinPrice.Value);
-            }
+            if (filters.MinPrice.HasValue)
+                filter &= builder.Gte(x => x.Price, filters.MinPrice.Value);
 
-            if (filters.MaxPrice.HasValue && filters.MaxPrice > 0)
-            {
-                filter &= filterBuilder.Lte(h => h.Price, filters.MaxPrice.Value);
-            }
+            if (filters.MaxPrice.HasValue)
+                filter &= builder.Lte(x => x.Price, filters.MaxPrice.Value);
 
-            // Bedroom filter
-            if (filters.Bedrooms?.Any() == true)
-            {
-                filter &= filterBuilder.In(h => h.Bedrooms, filters.Bedrooms);
-            }
+            if (filters.Bedrooms != null && filters.Bedrooms.Any())
+                filter &= builder.In(x => x.Bedrooms, filters.Bedrooms);
 
-            // Bathroom filter - only apply if greater than 0
-            if (filters.Bathrooms.HasValue && filters.Bathrooms > 0)
-            {
-                filter &= filterBuilder.Gte(h => h.Bathrooms, filters.Bathrooms.Value);
-            }
+            if (filters.Bathrooms.HasValue)
+                filter &= builder.Eq(x => x.Bathrooms, filters.Bathrooms.Value);
 
-            // Boolean filters - ONLY apply if explicitly TRUE
-            if (filters.PetFriendly == true)
-            {
-                filter &= filterBuilder.Eq(h => h.PetFriendly, true);
-            }
+            if (filters.PetFriendly.HasValue)
+                filter &= builder.Eq(x => x.PetFriendly, filters.PetFriendly.Value);
 
-            if (filters.Furnished == true)
-            {
-                filter &= filterBuilder.Eq(h => h.Furnished, true);
-            }
+            if (filters.Furnished.HasValue)
+                filter &= builder.Eq(x => x.Furnished, filters.Furnished.Value);
 
-            // Amenities filter - use AnyIn instead of All
-            if (filters.Amenities?.Any() == true)
-            {
-                filter &= filterBuilder.AnyIn(h => h.Amenities, filters.Amenities);
-            }
+            if (filters.Amenities != null && filters.Amenities.Any())
+                filter &= builder.All(x => x.Amenities, filters.Amenities);
 
-            // Apply sorting
-            var sort = GetSortDefinition(filters.SortBy, filters.SortOrder);
+            var sort = Builders<HousingListing>.Sort.Descending(x => x.DatePosted);
+            if (filters.SortBy?.ToLower() == "price")
+                sort = filters.SortOrder?.ToLower() == "asc"
+                    ? Builders<HousingListing>.Sort.Ascending(x => x.Price)
+                    : Builders<HousingListing>.Sort.Descending(x => x.Price);
 
-            var results = await _housingListings.Find(filter)
-                .Sort(sort)
-                .Limit(50)
-                .ToListAsync();
-
-            Console.WriteLine($"✅ Search returned {results.Count} results for zipCode '{filters.ZipCode}'");
-            
-            return results;
+            // FIX: Use _housingListings instead of _context.HousingListings
+            return await _housingListings.Find(filter).Sort(sort).ToListAsync();
         }
 
         public async Task<IEnumerable<HousingListing>> GetFeaturedListingsAsync()

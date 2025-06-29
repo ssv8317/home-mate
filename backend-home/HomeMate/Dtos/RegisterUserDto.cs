@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace HomeMate.Dtos
 {
@@ -22,7 +23,6 @@ namespace HomeMate.Dtos
         [Required]
         public string Gender { get; set; } = string.Empty;
 
-        // Remove ? to avoid nullable warnings for now
         public string Occupation { get; set; } = string.Empty;
         public string College { get; set; } = string.Empty;
         public string SleepSchedule { get; set; } = string.Empty;
@@ -32,5 +32,9 @@ namespace HomeMate.Dtos
         public string BudgetRange { get; set; } = string.Empty;
         public string LocationPreference { get; set; } = string.Empty;
         public string AboutMe { get; set; } = string.Empty;
+
+        // Add these if you want to support interests and profile pictures at registration
+        public List<string> Interests { get; set; } = new List<string>();
+        public List<string> ProfilePictures { get; set; } = new List<string>();
     }
 }

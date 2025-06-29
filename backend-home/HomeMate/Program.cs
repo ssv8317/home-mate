@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200") // Add both HTTP and HTTPS
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
@@ -29,7 +29,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IHousingService, HousingService>();
-builder.Services.AddScoped<IMatchService, MatchService>(); // Register MatchService
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<RoommateProfileService>();
 
 var app = builder.Build();
 
@@ -48,14 +49,16 @@ catch (Exception ex)
 }
 
 // Add a simple test endpoint at root
-app.MapGet("/", () => new { 
-    message = "HomeMate API is working!", 
+app.MapGet("/", () => new
+{
+    message = "HomeMate API is working!",
     timestamp = DateTime.Now,
     status = "Backend running successfully"
 });
 
 // Add test endpoint for auth
-app.MapGet("/api/test", () => new { 
+app.MapGet("/api/test", () => new
+{
     message = "Auth API endpoint working",
     timestamp = DateTime.Now
 });
@@ -67,10 +70,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// IMPORTANT: Use CORS before other middleware
+// Use CORS before other middleware
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
-app.UseAuthentication(); // Add this if you're using JWT
+app.UseAuthentication(); // If using JWT
 app.UseAuthorization();
 app.MapControllers();
 

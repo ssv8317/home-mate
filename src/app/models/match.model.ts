@@ -70,5 +70,5 @@ export interface MatchResponse {
 
 export interface SwipeRequest {
   profileId: string;
-  action: UserAction | 'like' | 'pass';
+  action: UserAction;
 }
