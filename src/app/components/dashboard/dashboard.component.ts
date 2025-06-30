@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HousingService } from '../../services/housing.service';
 import { MatchService } from '../../services/match.service'; // <-- Add this import
+import { MessageService, ChatMessage as ApiChatMessage } from '../../services/message.service';
 import { User } from '../../models/user.model';
 import { HousingListing } from '../../models/housing.model';
 import { MatchResponse, RoommateProfileView, UserAction } from '../../models/match.model'; // <-- Add UserAction import
@@ -14,8 +15,10 @@ import { MatchResponse, RoommateProfileView, UserAction } from '../../models/mat
 // Matched Profile Interface
 export interface MatchedProfile {
   id: string;
+  userId: string; // <-- Add userId for correct messaging
   fullName: string;
   age: number;
+  
   occupation: string;
   budgetRange: string;
   locationPreference: string;
@@ -32,6 +35,8 @@ export interface ChatMessage {
   text: string;
   isOwn: boolean;
   timestamp: Date;
+  senderId: string; // Added for debug
+  receiverId: string; // Added for debug
 }
 
 // Define tab type separately for better type safety
@@ -47,7 +52,7 @@ export type TabType = 'home' | 'apartments' | 'saved' | 'matches' | 'messages' |
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit, AfterViewChecked {
   currentUser: User | null = null;
   zipForm: FormGroup;
   housingSearchForm: FormGroup;
@@ -66,7 +71,6 @@ export class DashboardComponent implements OnInit {
   matchedProfiles: MatchedProfile[] = [];
   selectedProfile: MatchedProfile | null = null;
   newMessage = '';
-  chatMessages: ChatMessage[] = [];
   public isTyping = false;
   
   // Legacy properties for roommate search
@@ -78,11 +82,17 @@ export class DashboardComponent implements OnInit {
   // Add a property to track swiped profiles
   swipedProfileIds: Set<string> = new Set();
 
+  // Chat messages property
+  chatMessages: ChatMessage[] = [];
+
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private housingService: HousingService,
     private matchService: MatchService, // <-- Inject MatchService
+    private messageService: MessageService, // <-- Inject MessageService
     private router: Router
   ) {
     // Legacy roommate search form
@@ -105,7 +115,14 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.checkOrRedirectProfile();
     this.loadFeaturedListings();
-    this.initializeChatMessages();
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
   }
 
   /**
@@ -186,6 +203,7 @@ export class DashboardComponent implements OnInit {
           .filter(m => !this.swipedProfileIds.has(m.profile.id)) // Exclude swiped profiles
           .map(m => ({
             id: m.profile.id,
+            userId: m.profile.userId, // <-- Use userId from RoommateProfileView
             fullName: m.profile.fullName,
             age: m.profile.age,
             occupation: m.profile.occupation,
@@ -207,47 +225,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private initializeChatMessages(): void {
-    // Initialize sample chat messages for each profile
-    this.chatMessages = [
-      {
-        id: '1',
-        profileId: '1',
-        text: 'Hi! I saw we matched based on our apartment preferences. Are you still looking for a roommate?',
-        isOwn: false,
-        timestamp: new Date(Date.now() - 3600000) // 1 hour ago
-      },
-      {
-        id: '2',
-        profileId: '1',
-        text: 'Yes! I love that we both prefer downtown and are okay with pets. Have you found any good apartments yet?',
-        isOwn: true,
-        timestamp: new Date(Date.now() - 3000000) // 50 minutes ago
-      },
-      {
-        id: '3',
-        profileId: '2',
-        text: 'Hey! Fellow software engineer here. I noticed we have similar budgets and both work in tech. Want to chat about potential apartments?',
-        isOwn: false,
-        timestamp: new Date(Date.now() - 7200000) // 2 hours ago
-      },
-      {
-        id: '4',
-        profileId: '2',
-        text: 'Absolutely! I\'ve been looking at some places in the tech district. Would love to share some listings with you.',
-        isOwn: true,
-        timestamp: new Date(Date.now() - 6900000) // 1 hour 55 minutes ago
-      },
-      {
-        id: '5',
-        profileId: '3',
-        text: 'Hi there! I see we\'re both looking for places near campus. I\'m a marketing specialist and love the social aspect of shared living!',
-        isOwn: false,
-        timestamp: new Date(Date.now() - 10800000) // 3 hours ago
-      }
-    ];
-  }
-
   getInitials(fullName?: string): string {
     if (!fullName) return 'U';
     return fullName.split(' ')
@@ -260,56 +237,85 @@ export class DashboardComponent implements OnInit {
   // Matched Profiles methods
   selectProfile(profile: MatchedProfile): void {
     this.selectedProfile = profile;
+    this.loadChatMessages();
   }
 
-  getChatMessages(profileId: string): ChatMessage[] {
-    return this.chatMessages.filter(msg => msg.profileId === profileId);
+  private scrollToBottom(): void {
+    try {
+      if (this.chatContainer && this.chatContainer.nativeElement) {
+        this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      }
+    } catch (err) {}
+  }
+
+  loadChatMessages(): void {
+    if (!this.selectedProfile || !this.currentUser) return;
+    this.messageService.getConversation(this.currentUser.id!, this.selectedProfile.userId).subscribe({
+      next: (messages: any[]) => {
+        this.chatMessages = messages.map((msg: any) => {
+          const senderId = msg.SenderId || msg.senderId || '';
+          const receiverId = msg.ReceiverId || msg.receiverId || '';
+          const isOwn = senderId === this.currentUser!.id;
+          const profileId = isOwn ? receiverId : senderId;
+          return {
+            id: msg._id || msg.id || '',
+            profileId,
+            text: msg.Content || msg.content || '',
+            isOwn,
+            timestamp: new Date(msg.SentAt || msg.sentAt || Date.now()),
+            senderId,
+            receiverId
+          };
+        });
+        setTimeout(() => this.scrollToBottom(), 100);
+      },
+      error: (err) => {
+        this.chatMessages = [];
+      }
+    });
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim() || !this.selectedProfile) return;
+    if (!this.newMessage.trim() || !this.selectedProfile || !this.currentUser) return;
+    const content = this.newMessage.trim();
+    this.messageService.sendMessage(this.currentUser.id!, this.selectedProfile.userId, content).subscribe({
+      next: (msg: any) => {
+        const senderId = msg.SenderId || msg.senderId || '';
+        const receiverId = msg.ReceiverId || msg.receiverId || '';
+        const isOwn = senderId === this.currentUser!.id;
+        const profileId = isOwn ? receiverId : senderId;
+        this.chatMessages.push({
+          id: msg._id || msg.id || '',
+          profileId,
+          text: msg.Content || msg.content || '',
+          isOwn,
+          timestamp: new Date(msg.SentAt || msg.sentAt || Date.now()),
+          senderId,
+          receiverId
+        });
+        this.newMessage = '';
+        setTimeout(() => this.scrollToBottom(), 100);
+      },
+      error: (err) => {
+      }
+    });
+  }
 
-    const message: ChatMessage = {
-      id: Date.now().toString(),
-      profileId: this.selectedProfile.id,
-      text: this.newMessage.trim(),
-      isOwn: true,
-      timestamp: new Date()
-    };
-
-    this.chatMessages.push(message);
-    this.newMessage = '';
-
-    // Show typing indicator
-    this.isTyping = true;
-
-    // Simulate response after a delay
-    setTimeout(() => {
-      this.isTyping = false;
-      
-      const responses = [
-        "That sounds great! I'd love to learn more.",
-        "I'm definitely interested. When would be a good time to meet?",
-        "Perfect! I was thinking the same thing.",
-        "That apartment looks amazing! Should we schedule a viewing?",
-        "I agree! Let's definitely discuss this further.",
-        "Awesome! I think we'd make great roommates.",
-        "That's exactly what I was looking for too!",
-        "I love your enthusiasm! Let's make this happen.",
-        "Great idea! I'm excited to move forward with this.",
-        "That works perfectly for me. What's the next step?"
-      ];
-      
-      const responseMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        profileId: this.selectedProfile!.id,
-        text: responses[Math.floor(Math.random() * responses.length)],
-        isOwn: false,
-        timestamp: new Date()
-      };
-      
-      this.chatMessages.push(responseMessage);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+  /**
+   * Returns the last message text for a given profile ID from chatMessages.
+   * If no message is found, returns an empty string.
+   */
+  getLastMessageTextForProfile(profileId: string): string {
+    // Assuming chatMessages is an array of objects with profileId and text
+    if (!this.chatMessages || !Array.isArray(this.chatMessages)) {
+      return '';
+    }
+    // Find the last message for the given profileId
+    const messages = this.chatMessages.filter((msg: any) => msg.profileId === profileId);
+    if (messages.length === 0) {
+      return '';
+    }
+    return messages[messages.length - 1].text || '';
   }
 
   // Housing search methods
@@ -436,4 +442,17 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+  get noConversationSelected(): boolean {
+    return this.selectedProfile === null;
+  }
+}
+
+// Backend message interface for PascalCase properties
+interface BackendChatMessage {
+  _id: string;
+  SenderId: string;
+  ReceiverId: string;
+  Content: string;
+  SentAt: string;
 }

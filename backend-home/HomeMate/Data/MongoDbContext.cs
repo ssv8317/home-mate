@@ -29,5 +29,8 @@ namespace HomeMate.Data
 
         // NEW: Roommate Profile collection
         public IMongoCollection<RoommateProfile> RoommateProfiles => Database.GetCollection<RoommateProfile>("roommate_profiles");
+
+        // NEW: Messages collection
+        public IMongoCollection<Message> Messages => Database.GetCollection<Message>("messages");
     }
 }
