@@ -6,6 +6,9 @@ namespace HomeMate.Dtos
     public class RegisterUserDto
     {
         [Required]
+        [RegularExpression("^[0-9]{5}$", ErrorMessage = "Zip code must be 5 digits.")]
+        public string ZipCode { get; set; } = string.Empty;
+        [Required]
         public string FullName { get; set; } = string.Empty;
 
         [Required]
