@@ -31,6 +31,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IHousingService, HousingService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<RoommateProfileService>();
+builder.Services.AddScoped<IMessageService, MessageService>(); // Register IMessageService and MessageService
 
 var app = builder.Build();
 
@@ -73,7 +74,6 @@ if (app.Environment.IsDevelopment())
 // Use CORS before other middleware
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
-app.UseAuthentication(); // If using JWT
 app.UseAuthorization();
 app.MapControllers();
 

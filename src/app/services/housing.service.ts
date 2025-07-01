@@ -16,13 +16,14 @@ export class HousingService {
   }
 
   searchHousing(filters: any): Observable<HousingListing[]> {
-    // Fix the bedrooms.join error
+    // Debug log to check what is being sent
+    console.log('searchHousing filters:', filters);
     const searchParams = new HttpParams({
       fromObject: {
         zipCode: filters.zipCode || '',
         minPrice: filters.minPrice || '',
         maxPrice: filters.maxPrice || '',
-        bedrooms: filters.bedrooms || '', // Don't call .join() here
+        bedrooms: filters.bedrooms || '',
         bathrooms: filters.bathrooms || '',
         petFriendly: filters.petFriendly ? 'true' : 'false',
         furnished: filters.furnished ? 'true' : 'false',
