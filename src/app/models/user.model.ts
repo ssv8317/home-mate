@@ -14,6 +14,7 @@ export interface User {
   locationPreference: string;
   aboutMe: string;
   createdAt?: Date;         // Added this field
+  zipCode: string;         // Added zip code field
 }
 
 export interface LoginRequest {
@@ -36,6 +37,7 @@ export interface RegisterRequest {
   budgetRange: string;
   locationPreference: string;
   aboutMe: string;
+  zipCode: string;         // Added zip code field
 }
 
 export interface AuthResponse {

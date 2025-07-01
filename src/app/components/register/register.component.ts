@@ -84,6 +84,21 @@ import { AuthService } from '../../services/auth.service';
                     <span *ngIf="registerForm.get('age')?.errors?.['min']">Age must be at least 18</span>
                   </div>
                 </div>
+
+                <div>
+                  <label for="zipCode" class="block text-sm font-medium text-gray-700">Zip Code</label>
+                  <input
+                    type="text"
+                    id="zipCode"
+                    formControlName="zipCode"
+                    class="form-input"
+                    maxlength="10"
+                    [class.border-red-500]="registerForm.get('zipCode')?.invalid && registerForm.get('zipCode')?.touched"
+                  >
+                  <div *ngIf="registerForm.get('zipCode')?.invalid && registerForm.get('zipCode')?.touched" class="form-error">
+                    Zip code is required
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -290,6 +305,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       age: ['', [Validators.required, Validators.min(18)]],
+      zipCode: ['', Validators.required], // Added zipCode with required validator
       gender: ['', Validators.required],
       occupation: ['', Validators.required],
       college: [''],

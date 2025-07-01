@@ -46,6 +46,7 @@ public async Task<User> RegisterUserAsync(RegisterUserDto dto)
         BudgetRange = dto.BudgetRange,
         LocationPreference = dto.LocationPreference,
         AboutMe = dto.AboutMe,
+        ZipCode = dto.ZipCode, // Store zip code
         CreatedAt = DateTime.UtcNow
     };
 

@@ -259,21 +259,26 @@ namespace HomeMate.Services
             {
                 double totalScore = 0;
 
-                // Budget compatibility (25%)
+                // Zip code compatibility (40%)
+                double zipScore = profile1.ZipCode == profile2.ZipCode && !string.IsNullOrEmpty(profile1.ZipCode)
+                    ? 100 : 0;
+                totalScore += zipScore * 0.4;
+
+                // Budget compatibility (20%)
                 var budgetScore = CalculateBudgetCompatibility(profile1, profile2);
-                totalScore += budgetScore * 0.25;
+                totalScore += budgetScore * 0.2;
 
-                // Location compatibility (25%)
+                // Location compatibility (15%)
                 var locationScore = CalculateLocationCompatibility(profile1, profile2);
-                totalScore += locationScore * 0.25;
+                totalScore += locationScore * 0.15;
 
-                // Lifestyle compatibility (25%)
+                // Lifestyle compatibility (15%)
                 var lifestyleScore = CalculateLifestyleCompatibility(profile1, profile2);
-                totalScore += lifestyleScore * 0.25;
+                totalScore += lifestyleScore * 0.15;
 
-                // Interest compatibility (25%)
+                // Interest compatibility (10%)
                 var interestScore = CalculateInterestCompatibility(profile1, profile2);
-                totalScore += interestScore * 0.25;
+                totalScore += interestScore * 0.1;
 
                 return Math.Round(totalScore, 2);
             }

@@ -36,5 +36,8 @@ namespace HomeMate.Dtos
         // Add these if you want to support interests and profile pictures at registration
         public List<string> Interests { get; set; } = new List<string>();
         public List<string> ProfilePictures { get; set; } = new List<string>();
+
+        [Required]
+        public string ZipCode { get; set; } = string.Empty; // Added zip code
     }
 }

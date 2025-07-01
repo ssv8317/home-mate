@@ -24,6 +24,7 @@ namespace HomeMate.Models
         public string BudgetRange { get; set; } = string.Empty; // Removed ?
         public string LocationPreference { get; set; } = string.Empty; // Removed ?
         public string AboutMe { get; set; } = string.Empty; // Removed ?
+        public string ZipCode { get; set; } = string.Empty; // Added zip code
         public DateTime CreatedAt { get; set; }
     }
 }

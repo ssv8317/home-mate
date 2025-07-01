@@ -73,7 +73,8 @@ namespace HomeMate.Controllers
                     Interests = interests,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
+                    ZipCode = user.ZipCode, // Add zip code to roommate profile
                 };
                 await _roommateProfileService.CreateProfileAsync(roommateProfile);
 

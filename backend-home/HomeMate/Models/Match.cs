@@ -69,6 +69,9 @@ namespace HomeMate.Models
 
         [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // <-- Add this line
+
+        [BsonElement("zipCode")]
+        public string ZipCode { get; set; } = string.Empty; // Add zip code to profile
     }
 
     public class Match
