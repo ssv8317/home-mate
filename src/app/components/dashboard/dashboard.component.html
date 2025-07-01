@@ -682,16 +682,8 @@
             </div>
           </div>
           <!-- Chat Area -->
-          <div class="lg:col-span-2 flex flex-col">
-            <div *ngIf="!selectedProfile" class="flex-1 p-6 overflow-y-auto bg-gray-50">
-              <div class="text-center text-gray-500 py-8">
-                <div class="text-4xl mb-4">👥</div>
-                <p class="text-lg font-medium mb-2">Select a matched profile to start chatting</p>
-                <p class="text-sm">Choose from {{ matchedProfiles.length }} compatible roommate matches</p>
-              </div>
-            </div>
-            
-            <div *ngIf="selectedProfile" class="flex-1 flex flex-col">
+          <div class="lg:col-span-2 flex flex-col h-[600px] min-h-0">
+            <ng-container *ngIf="selectedProfile; else noConversationSelected">
               <!-- Chat Header -->
               <div class="border-b border-gray-200 p-4 bg-white">
                 <div class="flex items-center justify-between">
@@ -740,81 +732,91 @@
                 </div>
               </div>
               
-              <!-- Chat Messages -->
-              <div class="flex-1 min-h-0 p-6 overflow-y-auto bg-gray-50 space-y-4" #chatContainer tabindex="0" style="scroll-behavior: smooth;">
-                <div class="text-center">
-                  <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm inline-block">
-                    🎉 You matched with {{ selectedProfile.fullName }}! Start the conversation.
+              <!-- Chat Section: flex column, min-h-0 for scroll to work -->
+              <div class="flex flex-col flex-1 min-h-0">
+                <!-- Messages Area: scrollable, flex-1, min-h-0 -->
+                <div #messagesContainer class="flex-1 min-h-0 p-6 overflow-y-auto bg-gray-50 space-y-4">
+                  <div class="text-center">
+                    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm inline-block">
+                      🎉 You matched with {{ selectedProfile.fullName }}! Start the conversation.
+                    </div>
                   </div>
-                </div>
-                
-                <!-- Chat messages -->
-                <div *ngFor="let message of chatMessages" class="flex" [class.justify-end]="message.isOwn">
-                  <div class="flex items-end space-x-2 max-w-xs lg:max-w-md" [class.flex-row-reverse]="message.isOwn" [class.space-x-reverse]="message.isOwn">
-                    <div 
-                      *ngIf="!message.isOwn"
-                      class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                    >
+                  
+                  <!-- Chat messages -->
+                  <div *ngFor="let message of chatMessages" class="flex" [class.justify-end]="message.isOwn">
+                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md" [class.flex-row-reverse]="message.isOwn" [class.space-x-reverse]="message.isOwn">
+                      <div 
+                        *ngIf="!message.isOwn"
+                        class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      >
+                        {{ getInitials(selectedProfile.fullName) }}
+                      </div>
+                      <div 
+                        [class.bg-blue-500]="message.isOwn"
+                        [class.text-white]="message.isOwn"
+                        [class.bg-white]="!message.isOwn"
+                        [class.text-gray-900]="!message.isOwn"
+                        class="px-4 py-2 rounded-lg shadow-sm"
+                      >
+                        <p class="text-sm">{{ message.text }}</p>
+                        <p class="text-xs mt-1 opacity-70">
+                          {{ message.timestamp | date:'short' }}
+                        </p>
+                      </div>
+                      <div 
+                        *ngIf="message.isOwn"
+                        class="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      >
+                        {{ getInitials(currentUser?.fullName) }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Typing indicator (optional) -->
+                  <div *ngIf="isTyping" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {{ getInitials(selectedProfile.fullName) }}
                     </div>
-                    <div 
-                      [class.bg-blue-500]="message.isOwn"
-                      [class.text-white]="message.isOwn"
-                      [class.bg-white]="!message.isOwn"
-                      [class.text-gray-900]="!message.isOwn"
-                      class="px-4 py-2 rounded-lg shadow-sm"
-                    >
-                      <p class="text-sm">{{ message.text }}</p>
-                      <p class="text-xs mt-1 opacity-70">
-                        {{ message.timestamp | date:'short' }}
-                      </p>
-                    </div>
-                    <div 
-                      *ngIf="message.isOwn"
-                      class="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                    >
-                      {{ getInitials(currentUser?.fullName) }}
+                    <div class="bg-white px-4 py-2 rounded-lg shadow-sm">
+                      <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <!-- Typing indicator (optional) -->
-                <div *ngIf="isTyping" class="flex items-center space-x-2">
-                  <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {{ getInitials(selectedProfile.fullName) }}
-                  </div>
-                  <div class="bg-white px-4 py-2 rounded-lg shadow-sm">
-                    <div class="flex space-x-1">
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    </div>
+                <!-- Message Input Bar: stays at the bottom, not inside scrollable area -->
+                <div class="border-t border-gray-200 p-4 bg-white">
+                  <div class="flex items-center space-x-4">
+                    <input 
+                      type="text" 
+                      [(ngModel)]="newMessage"
+                      (keyup.enter)="sendMessage()"
+                      placeholder="Type your message..."
+                      class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <button 
+                      (click)="sendMessage()"
+                      [disabled]="!newMessage.trim()"
+                      class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                    >
+                      Send
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              <!-- Message Input -->
-              <div class="border-t border-gray-200 p-4 bg-white">
-                <div class="flex items-center space-x-4">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="newMessage"
-                    (keyup.enter)="sendMessage()"
-                    placeholder="Type your message..."
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                  <button 
-                    (click)="sendMessage()"
-                    [disabled]="!newMessage.trim()"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                    </svg>
-                  </button>
+            </ng-container>
+
+            <ng-template #noConversationSelected>
+              <div class="flex-1 p-6 flex items-center justify-center bg-gray-50">
+                <div class="text-center text-gray-500">
+                  <div class="text-4xl mb-4">👥</div>
+                  <p class="text-lg font-medium mb-2">Select a matched profile to start chatting</p>
                 </div>
               </div>
-            </div>
+            </ng-template>
           </div>
         </div>
       </div>
@@ -835,7 +837,7 @@
               <div class="space-y-2">
                 <!-- Active conversations from matched profiles -->
                 <div 
-                  *ngFor="let profile of matchedProfiles.slice(0, 3)" 
+                  *ngFor="let profile of matchedProfiles"
                   (click)="selectProfile(profile)"
                   class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all border-l-4 border-transparent hover:border-blue-500"
                 >
@@ -859,47 +861,13 @@
                     {{ getLastMessageTextForProfile(profile.id) }}
                   </p>
                 </div>
-                
-                <!-- Sample landlord conversations -->
-                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                        JS
-                      </div>
-                      <div>
-                        <h4 class="font-semibold text-gray-900">John Smith (Landlord)</h4>
-                        <p class="text-xs text-gray-500">Downtown Apartment</p>
-                      </div>
-                    </div>
-                    <span class="text-xs text-gray-500">1 hour ago</span>
-                  </div>
-                  <p class="text-sm text-gray-600 truncate">The apartment is available for viewing this weekend...</p>
-                </div>
-                
-                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
-                        SJ
-                      </div>
-                      <div>
-                        <h4 class="font-semibold text-gray-900">Sarah Johnson (Landlord)</h4>
-                        <p class="text-xs text-gray-500">Campus Studio</p>
-                      </div>
-                    </div>
-                    <span class="text-xs text-gray-500">Yesterday</span>
-                  </div>
-                  <p class="text-sm text-gray-600 truncate">Thanks for your interest! The lease terms are flexible...</p>
-                </div>
               </div>
             </div>
           </div>
           
           <!-- Chat Area -->
-          <div class="lg:col-span-2 flex flex-col">
-            <!-- If a profile is selected, show chat area (like in matches tab) -->
-            <div *ngIf="selectedProfile; else noConversationSelected" class="flex-1 flex flex-col">
+          <div class="lg:col-span-2 flex flex-col h-[600px] min-h-0">
+            <ng-container *ngIf="selectedProfile; else noConversationSelected">
               <!-- Chat Header -->
               <div class="border-b border-gray-200 p-4 bg-white">
                 <div class="flex items-center justify-between">
@@ -948,84 +916,86 @@
                 </div>
               </div>
               
-              <!-- Chat Messages -->
-              <div class="flex-1 min-h-0 p-6 overflow-y-auto bg-gray-50 space-y-4" #chatContainer tabindex="0" style="scroll-behavior: smooth;">
-                <div class="text-center">
-                  <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm inline-block">
-                    🎉 You matched with {{ selectedProfile.fullName }}! Start the conversation.
+              <!-- Chat Section: flex column, min-h-0 for scroll to work -->
+              <div class="flex flex-col flex-1 min-h-0">
+                <!-- Messages Area: scrollable, flex-1, min-h-0 -->
+                <div #messagesContainer class="flex-1 min-h-0 p-6 overflow-y-auto bg-gray-50 space-y-4">
+                  <div class="text-center">
+                    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm inline-block">
+                      🎉 You matched with {{ selectedProfile.fullName }}! Start the conversation.
+                    </div>
                   </div>
-                </div>
-                
-                <!-- Chat messages -->
-                <div *ngFor="let message of chatMessages" class="flex" [class.justify-end]="message.isOwn">
-                  <div class="flex items-end space-x-2 max-w-xs lg:max-w-md" [class.flex-row-reverse]="message.isOwn" [class.space-x-reverse]="message.isOwn">
-                    <div 
-                      *ngIf="!message.isOwn"
-                      class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                    >
+                  
+                  <!-- Chat messages -->
+                  <div *ngFor="let message of chatMessages" class="flex" [class.justify-end]="message.isOwn">
+                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md" [class.flex-row-reverse]="message.isOwn" [class.space-x-reverse]="message.isOwn">
+                      <div 
+                        *ngIf="!message.isOwn"
+                        class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      >
+                        {{ getInitials(selectedProfile.fullName) }}
+                      </div>
+                      <div 
+                        [class.bg-blue-500]="message.isOwn"
+                        [class.text-white]="message.isOwn"
+                        [class.bg-white]="!message.isOwn"
+                        [class.text-gray-900]="!message.isOwn"
+                        class="px-4 py-2 rounded-lg shadow-sm"
+                      >
+                        <p class="text-sm">{{ message.text }}</p>
+                        <p class="text-xs mt-1 opacity-70">
+                          {{ message.timestamp | date:'short' }}
+                        </p>
+                      </div>
+                      <div 
+                        *ngIf="message.isOwn"
+                        class="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      >
+                        {{ getInitials(currentUser?.fullName) }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Typing indicator (optional) -->
+                  <div *ngIf="isTyping" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {{ getInitials(selectedProfile.fullName) }}
                     </div>
-                    <div 
-                      [class.bg-blue-500]="message.isOwn"
-                      [class.text-white]="message.isOwn"
-                      [class.bg-white]="!message.isOwn"
-                      [class.text-gray-900]="!message.isOwn"
-                      class="px-4 py-2 rounded-lg shadow-sm"
-                    >
-                      <p class="text-sm">{{ message.text }}</p>
-                      <p class="text-xs mt-1 opacity-70">
-                        {{ message.timestamp | date:'short' }}
-                      </p>
-                    </div>
-                    <div 
-                      *ngIf="message.isOwn"
-                      class="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                    >
-                      {{ getInitials(currentUser?.fullName) }}
+                    <div class="bg-white px-4 py-2 rounded-lg shadow-sm">
+                      <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <!-- Typing indicator (optional) -->
-                <div *ngIf="isTyping" class="flex items-center space-x-2">
-                  <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {{ getInitials(selectedProfile.fullName) }}
-                  </div>
-                  <div class="bg-white px-4 py-2 rounded-lg shadow-sm">
-                    <div class="flex space-x-1">
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    </div>
+                <!-- Message Input Bar: stays at the bottom, not inside scrollable area -->
+                <div class="border-t border-gray-200 p-4 bg-white">
+                  <div class="flex items-center space-x-4">
+                    <input 
+                      type="text" 
+                      [(ngModel)]="newMessage"
+                      (keyup.enter)="sendMessage()"
+                      placeholder="Type your message..."
+                      class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <button 
+                      (click)="sendMessage()"
+                      [disabled]="!newMessage.trim()"
+                      class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                    >
+                      Send
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              <!-- Message Input -->
-              <div class="border-t border-gray-200 p-4 bg-white">
-                <div class="flex items-center space-x-4">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="newMessage"
-                    (keyup.enter)="sendMessage()"
-                    placeholder="Type your message..."
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                  <button 
-                    (click)="sendMessage()"
-                    [disabled]="!newMessage.trim()"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            </ng-container>
+
             <ng-template #noConversationSelected>
-              <div class="flex-1 p-6 overflow-y-auto bg-gray-50">
-                <div class="text-center text-gray-500 py-8">
+              <div class="flex-1 p-6 flex items-center justify-center bg-gray-50">
+                <div class="text-center text-gray-500">
                   <div class="text-4xl mb-4">💬</div>
                   <p class="text-lg font-medium mb-2">Select a conversation</p>
                   <p class="text-sm">Choose from your active conversations to view messages.</p>
@@ -1224,5 +1194,5 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </div> <!-- End max-w-7xl container -->
+</div> <!-- End min-h-screen -->
