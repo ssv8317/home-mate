@@ -205,6 +205,23 @@ import { AuthService } from '../../services/auth.service';
                 </div>
 
                 <div>
+                  <label for="zipCode" class="block text-sm font-medium text-gray-700">ZIP Code</label>
+                  <input
+                    type="text"
+                    id="zipCode"
+                    formControlName="zipCode"
+                    maxlength="5"
+                    placeholder="e.g., 12345"
+                    class="form-input"
+                    [class.border-red-500]="registerForm.get('zipCode')?.invalid && registerForm.get('zipCode')?.touched"
+                  >
+                  <div *ngIf="registerForm.get('zipCode')?.invalid && registerForm.get('zipCode')?.touched" class="form-error">
+                    <span *ngIf="registerForm.get('zipCode')?.errors?.['required']">ZIP code is required</span>
+                    <span *ngIf="registerForm.get('zipCode')?.errors?.['pattern']">ZIP code must be 5 digits</span>
+                  </div>
+                </div>
+
+                <div>
                   <label for="locationPreference" class="block text-sm font-medium text-gray-700">Location Preference</label>
                   <input
                     type="text"
@@ -299,6 +316,7 @@ export class RegisterComponent {
       petFriendly: ['', Validators.required],
       budgetRange: ['', Validators.required],
       locationPreference: ['', Validators.required],
+      zipCode: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
       aboutMe: ['', Validators.required]
     });
   }
