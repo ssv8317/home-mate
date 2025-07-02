@@ -35,7 +35,8 @@ namespace HomeMate.Controllers
                 SenderId = message.SenderId,
                 ReceiverId = message.ReceiverId,
                 Content = message.Content,
-                SentAt = message.SentAt
+                SentAt = message.SentAt,
+                IsRead = message.IsRead
             });
         }
 
@@ -50,7 +51,8 @@ namespace HomeMate.Controllers
                 SenderId = m.SenderId,
                 ReceiverId = m.ReceiverId,
                 Content = m.Content,
-                SentAt = m.SentAt
+                SentAt = m.SentAt,
+                IsRead = m.IsRead
             }).ToList();
             return Ok(result);
         }

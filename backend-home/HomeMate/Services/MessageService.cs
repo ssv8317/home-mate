@@ -25,7 +25,8 @@ namespace HomeMate.Services
                 SenderId = senderId,
                 ReceiverId = receiverId,
                 Content = content,
-                SentAt = DateTime.UtcNow
+                SentAt = DateTime.UtcNow,
+                IsRead = false
             };
             await _messages.InsertOneAsync(message);
             return message;
@@ -43,6 +44,14 @@ namespace HomeMate.Services
                     Builders<Message>.Filter.Eq(m => m.ReceiverId, userId1)
                 )
             );
+            // Mark all messages sent to userId1 (current user) as read
+            var unreadFilter = Builders<Message>.Filter.And(
+                Builders<Message>.Filter.Eq(m => m.ReceiverId, userId1),
+                Builders<Message>.Filter.Eq(m => m.SenderId, userId2),
+                Builders<Message>.Filter.Eq(m => m.IsRead, false)
+            );
+            var update = Builders<Message>.Update.Set(m => m.IsRead, true);
+            await _messages.UpdateManyAsync(unreadFilter, update);
             return await _messages.Find(filter).SortBy(m => m.SentAt).ToListAsync();
         }
     }

@@ -837,7 +837,7 @@
               <div class="space-y-2">
                 <!-- Active conversations from matched profiles -->
                 <div 
-                  *ngFor="let profile of matchedProfiles"
+                  *ngFor="let profile of matchedProfiles" 
                   (click)="selectProfile(profile)"
                   class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all border-l-4 border-transparent hover:border-blue-500"
                 >
@@ -861,6 +861,7 @@
                     {{ getLastMessageTextForProfile(profile.id) }}
                   </p>
                 </div>
+                <!-- End matched profiles list -->
               </div>
             </div>
           </div>

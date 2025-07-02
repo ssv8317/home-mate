@@ -1,3 +1,4 @@
+
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -48,6 +49,7 @@ export type TabType = 'home' | 'apartments' | 'saved' | 'matches' | 'messages' |
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, AfterViewInit, AfterViewChecked {
+  unreadMessageCount: number = 0;
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   currentUser: User | null = null;
@@ -97,6 +99,15 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
   ngOnInit(): void {
     this.checkOrRedirectProfile();
     this.loadFeaturedListings();
+    this.loadUnreadMessageCount();
+  }
+
+  loadUnreadMessageCount(): void {
+    if (!this.currentUser || !this.currentUser.id) return;
+    this.messageService.getUnreadMessageCount(this.currentUser.id).subscribe({
+      next: (count: number) => { this.unreadMessageCount = count; },
+      error: () => { this.unreadMessageCount = 0; }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -192,6 +203,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
         });
         this.cdr.detectChanges();
         // this.scrollToBottom(); // Remove auto-scroll to allow manual up/down scrolling
+        if (typeof this.loadUnreadMessageCount === 'function') {
+          this.loadUnreadMessageCount();
+        }
       },
       error: () => { this.chatMessages = []; }
     });
