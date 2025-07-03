@@ -49,7 +49,7 @@ export type TabType = 'home' | 'apartments' | 'saved' | 'matches' | 'messages' |
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, AfterViewInit, AfterViewChecked {
-  unreadMessageCount: number = 0;
+  unreadCounts: { [userId: string]: number } = {};
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   currentUser: User | null = null;
@@ -99,16 +99,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
   ngOnInit(): void {
     this.checkOrRedirectProfile();
     this.loadFeaturedListings();
-    this.loadUnreadMessageCount();
+    // Removed loadUnreadMessageCount; per-profile unread counts are now handled elsewhere
   }
 
-  loadUnreadMessageCount(): void {
-    if (!this.currentUser || !this.currentUser.id) return;
-    this.messageService.getUnreadMessageCount(this.currentUser.id).subscribe({
-      next: (count: number) => { this.unreadMessageCount = count; },
-      error: () => { this.unreadMessageCount = 0; }
-    });
-  }
+
+  // Removed loadUnreadMessageCount; per-profile unread counts are now handled elsewhere
 
   ngAfterViewInit(): void {
     // this.scrollToBottom(); // Remove auto-scroll to allow manual up/down scrolling
@@ -154,6 +149,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
           profileImage: m.profile.profilePictures?.[0] || '',
           lastActive: new Date(m.profile.updatedAt)
         }));
+        // Fetch unread counts for each profile
+        this.matchedProfiles.forEach(profile => {
+          this.messageService.getUnreadMessageCount(profile.userId).subscribe(count => {
+            this.unreadCounts[profile.userId] = count;
+          });
+        });
       },
       error: (error) => {
         console.error('Error loading matched profiles:', error);
@@ -201,11 +202,14 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
             receiverId: msg.ReceiverId || msg.receiverId
           };
         });
+        // Refresh unread count for this profile
+        if (this.selectedProfile) {
+          this.messageService.getUnreadMessageCount(this.selectedProfile.userId).subscribe(count => {
+            this.unreadCounts[this.selectedProfile!.userId] = count;
+          });
+        }
         this.cdr.detectChanges();
         // this.scrollToBottom(); // Remove auto-scroll to allow manual up/down scrolling
-        if (typeof this.loadUnreadMessageCount === 'function') {
-          this.loadUnreadMessageCount();
-        }
       },
       error: () => { this.chatMessages = []; }
     });
@@ -229,6 +233,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
             receiverId: msg.ReceiverId || msg.receiverId
         });
         this.newMessage = '';
+        // Refresh unread count for this profile
+        if (this.selectedProfile) {
+          this.messageService.getUnreadMessageCount(this.selectedProfile.userId).subscribe(count => {
+            this.unreadCounts[this.selectedProfile!.userId] = count;
+          });
+        }
         this.cdr.detectChanges();
         this.scrollToBottom(); // Only scroll on send
       }

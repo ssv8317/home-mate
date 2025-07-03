@@ -1,7 +1,3 @@
-  // Fetch unread message count for a user
-  getUnreadMessageCount(userId: string): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/unread-count/${userId}`);
-  }
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -21,6 +17,11 @@ export class MessageService {
   private apiUrl = 'https://localhost:56636/api/Message';
 
   constructor(private http: HttpClient) {}
+
+  // Fetch unread message count for a user
+  getUnreadMessageCount(userId: string): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/unread-count/${userId}`);
+  }
 
   // Fetch all messages between two users
   getConversation(userId: string, currentUserId: string): Observable<ChatMessage[]> {
