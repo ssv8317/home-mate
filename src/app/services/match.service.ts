@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RoommateProfile, RoommateProfileView, MatchResponse, UserAction, SwipeRequest } from '../models/match.model';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatchService {
-  private apiUrl = 'https://localhost:56636/api/match';
+  private apiUrl = environment.apiBaseUrl + '/match';
 
   constructor(private http: HttpClient) {}
 

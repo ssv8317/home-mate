@@ -252,7 +252,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, AfterViewCheck
         (msg.senderId === this.currentUser?.id && msg.receiverId === profileId) ||
         (msg.senderId === profileId && msg.receiverId === this.currentUser?.id)
     );
-    return lastMessage ? lastMessage.text : 'No messages yet.';
+    return lastMessage ? lastMessage.text : '';
   }
 
   searchHousing(): void {
