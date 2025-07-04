@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add CORS - Updated configuration
+// Add CORS with updated configuration - allow localhost on ports 4200 and 8080 (http and https)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -21,7 +21,9 @@ builder.Services.AddCors(options =>
             "http://localhost:4200",
             "https://localhost:4200",
             "http://localhost:8080",
-            "https://localhost:8080"
+            "https://localhost:8080",
+            "http://localhost",
+            "http://localhost:80"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -29,13 +31,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// MongoDB and application services
+// Register MongoDB and application services
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IHousingService, HousingService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<RoommateProfileService>();
-builder.Services.AddScoped<IMessageService, MessageService>(); // Register IMessageService and MessageService
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 var app = builder.Build();
 
@@ -53,7 +55,7 @@ catch (Exception ex)
     Console.WriteLine($"❌ MongoDB connection failed: {ex.Message}");
 }
 
-// Add a simple test endpoint at root
+// Simple test endpoints
 app.MapGet("/", () => new
 {
     message = "HomeMate API is working!",
@@ -61,7 +63,6 @@ app.MapGet("/", () => new
     status = "Backend running successfully"
 });
 
-// Add test endpoint for auth
 app.MapGet("/api/test", () => new
 {
     message = "Auth API endpoint working",
@@ -75,10 +76,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Use CORS before other middleware
+// Use CORS middleware early in the pipeline
 app.UseCors("AllowAngular");
+
+// Handle OPTIONS requests globally (preflight) to return 200 with CORS headers
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        // The CORS middleware already adds the necessary headers
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 Console.WriteLine("🚀 HomeMate API is running!");

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend-home/HomeMate
+      dockerfile: Dockerfile
+    container_name: homemate-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__MongoDb=mongodb://host.docker.internal:27017/homemate
+    networks:
+      - homemate-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: homemate-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - homemate-network
+
+networks:
+  homemate-network:
+    driver: bridge
