@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using HomeMate.Models;
+using System;
 
 namespace HomeMate.Data
 {
@@ -10,10 +11,15 @@ namespace HomeMate.Data
 
         public MongoDbContext(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("MongoDb");
+            // Prefer environment variable, fallback to config
+            var connectionString = Environment.GetEnvironmentVariable("MONGODB_URI");
             if (string.IsNullOrEmpty(connectionString))
             {
-                connectionString = "mongodb://localhost:27017/homemate";
+                connectionString = configuration.GetConnectionString("MongoDb");
+            }
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("MongoDB connection string not found. Set the MONGODB_URI environment variable or provide it in appsettings.json.");
             }
 
             var mongoUrl = new MongoUrl(connectionString);

@@ -8,9 +8,10 @@ services:
     container_name: homemate-backend
     ports:
       - "5000:5000"
+    env_file:
+      - ./backend-home/HomeMate/.env
     environment:
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__MongoDb=mongodb://host.docker.internal:27017/homemate
     networks:
       - homemate-network
 
