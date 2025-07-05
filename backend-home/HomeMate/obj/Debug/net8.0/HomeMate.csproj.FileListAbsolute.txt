@@ -165,8 +165,6 @@ C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\ne
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\HomeMate.runtimeconfig.json
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\HomeMate.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\HomeMate.pdb
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\AWSSDK.Core.dll
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\AWSSDK.SecurityToken.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\DnsClient.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
@@ -179,8 +177,6 @@ C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\ne
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\Microsoft.OpenApi.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\MongoDB.Bson.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\MongoDB.Driver.dll
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\MongoDB.Driver.Core.dll
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\MongoDB.Libmongocrypt.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\SharpCompress.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\Snappier.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
@@ -188,9 +184,6 @@ C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\ne
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\ZstdSharp.dll
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\runtimes\linux\native\libmongocrypt.so
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\runtimes\osx\native\libmongocrypt.dylib
-C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\bin\Debug\net8.0\runtimes\win\native\mongocrypt.dll
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.csproj.AssemblyReference.cache
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\sathv\Documents\project-code\project\backend-home\HomeMate\obj\Debug\net8.0\HomeMate.AssemblyInfoInputs.cache

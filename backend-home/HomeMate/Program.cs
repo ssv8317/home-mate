@@ -70,11 +70,14 @@ app.MapGet("/api/test", () => new
 });
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+// Enable Swagger in all environments (not just Development)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeMate API V1");
+    c.RoutePrefix = "swagger"; // Swagger UI at /swagger
+});
 
 // Use CORS middleware early in the pipeline
 app.UseCors("AllowAngular");
