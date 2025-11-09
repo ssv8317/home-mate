@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DLVoM5EV/Dc=",
+  "dgSpecHash": "MeSBcM9sXCs=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sathv\\Documents\\project-code\\project\\backend-home\\HomeMate\\HomeMate.csproj",
+  "projectFilePath": "C:\\Users\\sathv\\home-mate\\backend-home\\HomeMate\\HomeMate.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sathv\\.nuget\\packages\\awssdk.core\\3.7.100.14\\awssdk.core.3.7.100.14.nupkg.sha512",
     "C:\\Users\\sathv\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
